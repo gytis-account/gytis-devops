@@ -22,15 +22,6 @@ output "cluster_certificate_authority_data" {
   value       = module.eks.cluster_certificate_authority_data
 }
 
-### IAM ###
-output "eks_admin_role_arn" {
-  value = aws_iam_role.eks_admin.arn
-}
-
-output "eks_readonly_role_arn" {
-  value = aws_iam_role.eks_readonly.arn
-}
-
 ### VPC ###
 output "subnet_ids" {
   value = module.vpc.private_subnets
