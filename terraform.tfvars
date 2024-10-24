@@ -1,7 +1,7 @@
 account_id           = "054037101494"
 region               = "eu-north-1"
 cluster_name         = "Atlantis-EKS"
-s3_bucket_name       = "Atlantis-Bucket"
+s3_bucket_name       = "atlantis-bucket-gytis"
 atlantis_tfstate     = "state-files/atlantis.tfstate"
 kubernetes_version   = "1.30"
 vpc_name             = "Atlantis-VPC"
