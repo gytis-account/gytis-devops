@@ -30,4 +30,4 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         TF_VAR_github_token: ${{ secrets.SECRET_TOKEN }}
         TF_VAR_github_webhook_secret: ${{ secrets.WEBHOOK_SECRET }}
-      run: terraform apply -auto-approve
+      run: terraform apply -target=module.s3_bucket -auto-approve

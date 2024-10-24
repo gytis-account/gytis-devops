@@ -1,17 +1,12 @@
-name: Terraform
+name: Apply Full Configuration
 
 on:
-  workflow_run:
-    workflows: ["Create S3 Bucket"]
-    types:
-      - completed
-  pull_request:
+  push:
     branches:
       - main
-  workflow_dispatch:  # Allows manual triggering of the workflow
 
 jobs:
-  terraform:
+  apply-full-configuration:
     runs-on: ubuntu-latest
 
     steps:
@@ -36,7 +31,6 @@ jobs:
       run: terraform plan
 
     - name: Terraform Apply
-      if: github.event_name == 'workflow_dispatch'  # Only run apply on manual trigger
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
