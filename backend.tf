@@ -5,4 +5,4 @@ terraform {
     region  = "eu-north-1"
     encrypt = true
   }
-}
+}  
