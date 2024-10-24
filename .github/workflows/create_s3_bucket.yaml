@@ -1,17 +1,12 @@
-name: Terraform
+name: Create S3 Bucket
 
 on:
-  workflow_run:
-    workflows: ["Create S3 Bucket"]
-    types:
-      - completed
-  pull_request:
+  push:
     branches:
       - main
-  workflow_dispatch:  
 
 jobs:
-  terraform:
+  create-s3-bucket:
     runs-on: ubuntu-latest
 
     steps:
@@ -22,17 +17,13 @@ jobs:
       uses: hashicorp/setup-terraform@v1
 
     - name: Terraform Init
-      run: terraform init -migrate-state
-
-    - name: Terraform Plan
       env:
-        TF_VAR_github_token: ${{ secrets.SECRET_TOKEN }}
-        TF_VAR_github_webhook_secret: ${{ secrets.WEBHOOK_SECRET }}
-      run: terraform plan
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      run: terraform init
 
     - name: Terraform Apply
-      if: github.event_name == 'workflow_dispatch' 
       env:
-        TF_VAR_github_token: ${{ secrets.SECRET_TOKEN }}
-        TF_VAR_github_webhook_secret: ${{ secrets.WEBHOOK_SECRET }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       run: terraform apply -auto-approve
