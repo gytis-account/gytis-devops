@@ -16,6 +16,12 @@ jobs:
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v1
 
+    - name: Print AWS CLI Version
+      run: aws --version
+
+    - name: Print Environment Variables
+      run: env
+
     - name: Test AWS CLI
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
