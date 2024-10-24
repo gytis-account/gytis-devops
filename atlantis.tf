@@ -9,9 +9,9 @@ provider "helm" {
 
 resource "helm_release" "atlantis" {
   name       = "atlantis"
-  repository = "https://helm.releases.hashicorp.com"
+  repository = "https://runatlantis.github.io/helm-charts"
   chart      = "atlantis"
-  version    = "3.0.0"
+  version    = "5.7.0"
 
   set {
     name  = "vcsSecret.githubToken"
