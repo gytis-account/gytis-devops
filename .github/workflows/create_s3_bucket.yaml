@@ -1,12 +1,17 @@
-name: Create S3 Bucket
+name: Terraform
 
 on:
-  push:
+  workflow_run:
+    workflows: ["Create S3 Bucket"]
+    types:
+      - completed
+  pull_request:
     branches:
       - main
+  workflow_dispatch:  # Allows manual triggering of the workflow
 
 jobs:
-  create-s3-bucket:
+  terraform:
     runs-on: ubuntu-latest
 
     steps:
@@ -17,7 +22,17 @@ jobs:
       uses: hashicorp/setup-terraform@v1
 
     - name: Terraform Init
-      run: terraform init
+      run: terraform init -migrate-state
+
+    - name: Terraform Plan
+      env:
+        TF_VAR_github_token: ${{ secrets.SECRET_TOKEN }}
+        TF_VAR_github_webhook_secret: ${{ secrets.WEBHOOK_SECRET }}
+      run: terraform plan
 
     - name: Terraform Apply
+      if: github.event_name == 'workflow_dispatch'  # Only run apply on manual trigger
+      env:
+        TF_VAR_github_token: ${{ secrets.SECRET_TOKEN }}
+        TF_VAR_github_webhook_secret: ${{ secrets.WEBHOOK_SECRET }}
       run: terraform apply -auto-approve
