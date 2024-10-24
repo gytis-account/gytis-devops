@@ -1,0 +1,23 @@
+name: Create S3 Bucket
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  create-s3-bucket:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
+
+    - name: Terraform Init
+      run: terraform init
+
+    - name: Terraform Apply
+      run: terraform apply -auto-approve
