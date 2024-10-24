@@ -46,6 +46,23 @@ module "eks" {
   tags = var.tags
 }
 
+resource "kubernetes_config_map" "aws_auth" {
+  metadata {
+    name      = "aws-auth"
+    namespace = "kube-system"
+  }
+
+  data = {
+    mapRoles = jsonencode([
+      {
+        rolearn  = "arn:aws:iam::054037101494:role/eks-node-group"
+        username = "system:node:{{EC2PrivateDNSName}}"
+        groups   = ["system:bootstrappers", "system:nodes"]
+      }
+    ])
+  }
+}
+
 data "aws_caller_identity" "current" {}
 
 # IAM Configuration
