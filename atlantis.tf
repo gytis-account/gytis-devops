@@ -24,9 +24,9 @@ provider "helm" {
 
 resource "helm_release" "atlantis" {
   name       = "atlantis"
-  repository = "https://runatlantis.github.io/helm-charts"
+  repository = "https://helm.runatlantis.io"
   chart      = "atlantis"
-  version    = "5.7.0"
+  #version    = "5.7.0"
 
   set {
     name  = "vcsSecret.githubToken"
