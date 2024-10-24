@@ -48,61 +48,91 @@ module "eks" {
 data "aws_caller_identity" "current" {}
 
 # IAM Configuration
-resource "aws_iam_role" "eks_cluster" {
-  name = "eks-cluster-role"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Effect = "Allow",
-        Principal = {
-          Service = "eks.amazonaws.com"
-        },
-        Action = "sts:AssumeRole"
-      }
-    ]
-  })
+### Configuring eks-readonly role in AWS IAM - policy, role and policy attachment ###
+resource "aws_iam_policy" "eks-readonly-policy" {
+  name        = "eks_readonly_policy"
+  path        = "/"
+  description = "Read only policy for eks-readonly role"
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": {
+    "Sid": "45345354354",
+    "Effect": "Allow",
+    "Action": [
+      "eks:DescribeCluster",
+      "eks:ListCluster"
+    ],
+    "Resource": "*"
+    }
+}
+EOF
 }
 
-resource "aws_iam_role_policy_attachment" "AmazonEKSClusterPolicy" {
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
-  role       = aws_iam_role.eks_cluster.name
+resource "aws_iam_role" "eks-readonly-role" {
+  name = "eks_readonly"
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "AWS": "arn:aws:iam::${var.account_id}:root"
+      },
+      "Effect": "Allow",
+      "Sid": ""
+    }
+  ]
+}
+EOF
 }
 
-resource "aws_iam_role_policy_attachment" "AmazonEKSServicePolicy" {
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
-  role       = aws_iam_role.eks_cluster.name
+resource "aws_iam_role_policy_attachment" "eks-readonly-policy-attach" {
+  role       = aws_iam_role.eks-readonly-role.name
+  policy_arn = aws_iam_policy.eks-readonly-policy.arn
 }
 
-resource "aws_iam_role" "eks_nodes" {
-  name = "eks-node-group"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Effect = "Allow",
-        Principal = {
-          Service = "ec2.amazonaws.com"
-        },
-        Action = "sts:AssumeRole"
-      }
-    ]
-  })
+### Configuring eks-admin role in AWS IAM - policy, role and policy attachment ###
+resource "aws_iam_policy" "eks-admin-policy" {
+  name        = "eks_admin_policy"
+  path        = "/"
+  description = "Admin policy for eks-admin role"
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": {
+    "Sid": "45345354354",
+    "Effect": "Allow",
+    "Action": [
+      "*"
+    ],
+    "Resource": "*"
+    }
+}
+EOF
 }
 
-resource "aws_iam_role_policy_attachment" "AmazonEKSWorkerNodePolicy" {
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
-  role       = aws_iam_role.eks_nodes.name
+resource "aws_iam_role" "eks-admin-role" {
+  name = "eks_admin"
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "AWS": "arn:aws:iam::${var.account_id}:root"
+      },
+      "Effect": "Allow",
+      "Sid": ""
+    }
+  ]
+}
+EOF
 }
 
-resource "aws_iam_role_policy_attachment" "AmazonEKS_CNI_Policy" {
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
-  role       = aws_iam_role.eks_nodes.name
-}
-
-resource "aws_iam_role_policy_attachment" "AmazonEC2ContainerRegistryReadOnly" {
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
-  role       = aws_iam_role.eks_nodes.name
+resource "aws_iam_role_policy_attachment" "eks-admin-policy-attach" {
+  role       = aws_iam_role.eks-admin-role.name
+  policy_arn = aws_iam_policy.eks-admin-policy.arn
 }
