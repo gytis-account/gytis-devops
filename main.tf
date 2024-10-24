@@ -46,21 +46,27 @@ module "eks" {
   tags = var.tags
 }
 
-resource "kubernetes_config_map" "aws_auth" {
-  metadata {
-    name      = "aws-auth"
-    namespace = "kube-system"
-  }
+# aws-auth ConfigMap
+module "eks_auth" {
+  source  = "terraform-aws-modules/eks/aws//modules/aws-auth"
+  version = "~> 20.0"
 
-  data = {
-    mapRoles = jsonencode([
-      {
-        rolearn  = "arn:aws:iam::054037101494:role/eks-node-group"
-        username = "system:node:{{EC2PrivateDNSName}}"
-        groups   = ["system:bootstrappers", "system:nodes"]
-      }
-    ])
-  }
+  manage_aws_auth_configmap = true
+
+  aws_auth_roles = [
+    {
+      rolearn  = aws_iam_role.eks_nodes.arn
+      username = "system:node:{{EC2PrivateDNSName}}"
+      groups   = ["system:bootstrappers", "system:nodes"]
+    },
+    {
+      rolearn  = aws_iam_role.eks_cluster.arn
+      username = "eks-admin"
+      groups   = ["system:masters"]
+    }
+  ]
+
+  depends_on = [module.eks]
 }
 
 data "aws_caller_identity" "current" {}
@@ -123,4 +129,39 @@ resource "aws_iam_role_policy_attachment" "AmazonEKS_CNI_Policy" {
 resource "aws_iam_role_policy_attachment" "AmazonEC2ContainerRegistryReadOnly" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
   role       = aws_iam_role.eks_nodes.name
+}
+
+resource "aws_iam_role" "eks_admin_role" {
+  name = "eks-admin-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect    = "Allow"
+        Principal = {
+          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
+        }
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
+}
+
+# Read-only Role for EKS
+resource "aws_iam_role" "eks_read_only_role" {
+  name = "eks-read-only-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect    = "Allow"
+        Principal = {
+          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
+        }
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
 }
