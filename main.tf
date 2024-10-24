@@ -52,19 +52,22 @@ data "aws_caller_identity" "current" {}
 resource "aws_iam_policy" "eks-readonly-policy" {
   name        = "eks_readonly_policy"
   path        = "/"
-  description = "Read only policy for eks-readonly role"
+  description = "Read-only policy for eks-readonly role"
   policy = <<EOF
 {
   "Version": "2012-10-17",
-  "Statement": {
-    "Sid": "45345354354",
-    "Effect": "Allow",
-    "Action": [
-      "eks:DescribeCluster",
-      "eks:ListCluster"
-    ],
-    "Resource": "*"
+  "Statement": [
+    {
+      "Sid": "ReadOnlyAccess",
+      "Effect": "Allow",
+      "Action": [
+        "eks:Describe*",
+        "eks:List*",
+        "eks:View*"
+      ],
+      "Resource": "*"
     }
+  ]
 }
 EOF
 }
@@ -101,14 +104,14 @@ resource "aws_iam_policy" "eks-admin-policy" {
   policy = <<EOF
 {
   "Version": "2012-10-17",
-  "Statement": {
-    "Sid": "45345354354",
-    "Effect": "Allow",
-    "Action": [
-      "*"
-    ],
-    "Resource": "*"
+  "Statement": [
+    {
+      "Sid": "AdminAccess",
+      "Effect": "Allow",
+      "Action": "*",
+      "Resource": "*"
     }
+  ]
 }
 EOF
 }
